@@ -56,14 +56,10 @@ public:
         lecturesAttended.push_back(lecture);
     }
 
-    void createFlashcard(const string& title, const string& description, size_t lectureIndex) {
-        if (lectureIndex >= 0 && lectureIndex < lecturesAttended.size()) {
-            Flashcard flashcard(title, description);
-            lecturesAttended[lectureIndex].addFlashcard(flashcard);
-            cout << "Flashcard created successfully!" << endl;
-        } else {
-            cout << "Invalid lecture index!" << endl;
-        }
+    void createFlashcard(const string& title, const string& description) {
+        Flashcard flashcard(title, description);
+        lecturesAttended.back().addFlashcard(flashcard);
+        cout << "Flashcard created successfully!" << endl;
     }
 
     void displayLectures() const {
@@ -113,12 +109,9 @@ int main() {
 
     int choice;
     do {
-        cout << "********************************\n"
-                "***  1. Create Flashcard     ***\n"
-                "***  2. View Flashcards      ***\n"
-                "***  3. Exit                 ***\n"
-                "********************************\n"
-                "\n"
+        cout << "1. Create Flashcard\n"
+                "2. View Flashcards\n"
+                "3. Exit\n"
                 "Enter your choice: ";
         cin >> choice;
 
@@ -135,7 +128,7 @@ int main() {
                     getline(cin, title);
                     cout << "Enter Flashcard Description: ";
                     getline(cin, description);
-                    student.createFlashcard(title, description, lectureChoice - 1); // Subtract 1 for 0-based indexing
+                    student.createFlashcard(title, description);
                 } else {
                     cout << "Invalid subject choice!" << endl;
                 }

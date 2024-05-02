@@ -1,306 +1,207 @@
 #include <iostream>
 #include <string>
-#include <vector>
+#include <unordered_map>
+
+#ifdef _WIN32
+#include <windows.h> // For Windows
+#else
+#include <cstdlib> // For Unix/Linux
+#endif
 
 using namespace std;
 
-class Course
-{
-private:
-    string courseName;
-    string courseCode;
-    float price;
-    string timeSlot;
-    int duration;
+void clearScreen() {
+#ifdef _WIN32
+    system("cls"); // For Windows
+#else
+    system("clear"); // For Unix/Linux
+#endif
+}
 
-public:
-    Course(string courseName, string courseCode, float price, string timeSlot, int duration)
-        : courseName(courseName), courseCode(courseCode), price(price), timeSlot(timeSlot), duration(duration) {}
-
-    const string &getCourseName() const
-    {
-        return courseName;
-    }
-
-    const string &getCourseCode() const
-    {
-        return courseCode;
-    }
-
-    float getPrice() const
-    {
-        return price;
-    }
-
-    void setPrice(float newPrice)
-    {
-        price = newPrice;
-    }
-
-    const string &getTimeSlot() const
-    {
-        return timeSlot;
-    }
-
-    int getDuration() const
-    {
-        return duration;
-    }
-};
-
-class User
-{
+class User {
 protected:
     string username;
-    string email;
-    string firstName;
-    string lastName;
-    int gradeLevel;
+    string password;
 
 public:
-    User(string username, string email, string firstName, string lastName, int gradeLevel)
-        : username(username), email(email), firstName(firstName), lastName(lastName), gradeLevel(gradeLevel) {}
+    User(const string& username, const string& password) : username(username), password(password) {}
 
-    const string &getUsername() const
-    {
+    virtual void displayType() const = 0;  // Pure virtual function
+
+    const string& getUsername() const {
         return username;
     }
 
-    const string &getFirstName() const
-    {
-        return firstName;
+    bool isPasswordCorrect(const string& inputPassword) const {
+        return password == inputPassword;
     }
-
-    const string &getLastName() const
-    {
-        return lastName;
-    }
-
-    int getGradeLevel() const
-    {
-        return gradeLevel;
-    }
-
-    virtual void displayProfile() const = 0;
 };
 
-class Teacher : public User
-{
+class Tutor : public User {
 private:
-    vector<Course> allCourses;
+    string phoneNo;
+    string email;
+    string fluentIn;
+    string degree;
+    string bio;
+    string whatsappNo;
 
 public:
-    Teacher(string username, string email, string firstName, string lastName)
-        : User(username, email, firstName, lastName, 0) {}
+    Tutor(const string& username, const string& password, const string& phoneNo, const string& email, const string& fluentIn, const string& degree, const string& bio, const string& whatsappNo)
+        : User(username, password), phoneNo(phoneNo), email(email), fluentIn(fluentIn), degree(degree), bio(bio), whatsappNo(whatsappNo) {}
 
-    void createCourse(const string &courseName, const string &courseCode, float price, const string &timeSlot, int duration)
-    {
-        allCourses.emplace_back(courseName, courseCode, price, timeSlot, duration);
-        cout << "Course '" << courseName << "' created successfully!" << endl;
+    void displayType() const override {
+        cout << "# User Type: Tutor \n";
+        cout << "# Phone No: " << phoneNo << endl;
+        cout << "# Email: " << email << endl;
+        cout << "# Fluent In: " << fluentIn << endl;
+        cout << "# Degree: " << degree << endl;
+        cout << "# Bio: " << bio << endl;
+        cout << "# WhatsApp No: " << whatsappNo << endl;
     }
+};
 
-    void displayProfile() const override
-    {
-        cout << "Teacher Profile" << endl;
-        cout << "Name: " << getFirstName() << " " << getLastName() << endl;
-        cout << "Username: " << getUsername() << endl;
-        cout << "Email: " << email << endl;
-        cout << "Courses Created:" << endl;
-        for (const auto &course : allCourses)
-        {
-            cout << "- " << course.getCourseName() << " (" << course.getPrice() << ")" << endl;
+class Student : public User {
+private:
+    string phoneNo;
+    string email;
+    string fluentIn;
+    string learningGoals;
+    string bio;
+    string whatsappNo;
+
+public:
+    Student(const string& username, const string& password, const string& phoneNo, const string& email, const string& fluentIn, const string& learningGoals, const string& bio, const string& whatsappNo)
+        : User(username, password), phoneNo(phoneNo), email(email), fluentIn(fluentIn), learningGoals(learningGoals), bio(bio), whatsappNo(whatsappNo) {}
+
+    void displayType() const override {
+        cout << "# User Type: Student \n";
+        cout << "# Phone No: " << phoneNo << endl;
+        cout << "# Email: " << email << endl;
+        cout << "# Fluent In: " << fluentIn << endl;
+        cout << "# Learning Goals: " << learningGoals << endl;
+        cout << "# Bio: " << bio << endl;
+        cout << "# WhatsApp No: " << whatsappNo << endl;
+    }
+};
+
+class UserManager {
+private:
+    unordered_map<string, User*> users;
+
+public:
+    ~UserManager() {
+        for (const auto& pair : users) {
+            delete pair.second; // Free memory for each user
         }
     }
-};
 
-class Student : public User
-{
-private:
-    vector<Course> coursesTaken;
-    float creditBalance; // New attribute to store credits
-
-public:
-    Student(string username, string email, string firstName, string lastName, int gradeLevel)
-        : User(username, email, firstName, lastName, gradeLevel), creditBalance(0) {}
-
-    float getCreditBalance() const
-    {
-        return creditBalance;
+    void displayMenu() const {
+        clearScreen();
+        cout << "\n";
+        cout << "**************************************************\n";
+        cout << "****  Welcome to the Landing Page of LingQ    ****\n";
+        cout << "****  Get Started...                          ****\n";
+        cout << "****  1. Register as Tutor                    ****\n";
+        cout << "****  2. Register as Student                  ****\n";
+        cout << "****  3. Login                                ****\n";
+        cout << "****  4. Exit                                 ****\n";
+        cout << "**************************************************\n";
+        cout << "\n";
     }
 
-    void addCredits(float credits)
-    {
-        creditBalance += credits;
-        cout << "Credits added successfully! Current balance: " << creditBalance << endl;
-    }
+    void registerUser() {
+        string username, password, phoneNo, email, fluentIn, degree, bio, whatsappNo, learningGoals;
+        cout << "Enter username: ";
+        cin >> username;
+        cout << "Enter password: ";
+        cin >> password;
+        cout << "Enter phone number: ";
+        cin >> phoneNo;
+        cout << "Enter email: ";
+        cin >> email;
+        cout << "Enter languages fluent in: ";
+        cin.ignore();
+        getline(cin, fluentIn);
+        cout << "Enter degree: ";
+        getline(cin, degree);
+        cout << "Enter bio: ";
+        getline(cin, bio);
+        cout << "Enter WhatsApp number: ";
+        cin >> whatsappNo;
 
-    void buyCourse(const Course &course)
-    {
-        if (creditBalance >= course.getPrice()) {
-            creditBalance -= course.getPrice();
-            coursesTaken.push_back(course);
-            cout << "Course '" << course.getCourseName() << "' purchased successfully!" << endl;
+        string userType;
+        cout << "Choose user type (Tutor/Student): ";
+        cin >> userType;
+
+        if (userType == "Tutor") {
+            User* newUser = new Tutor(username, password, phoneNo, email, fluentIn, degree, bio, whatsappNo);
+            users[username] = newUser;
+            loginUser(username, password);
+            cout << "# Registration successful!\n";
+        } else if (userType == "Student") {
+            User* newUser = new Student(username, password, phoneNo, email, fluentIn, learningGoals, bio, whatsappNo);
+            users[username] = newUser;
+            loginUser(username, password);
+            cout << "# Registration successful!\n";
         } else {
-            cout << "Insufficient credits to buy this course!" << endl;
+            cout << "Error: Invalid user type.\n";
         }
     }
 
-    void browseCourses(const vector<Course> &availableCourses) const
-    {
-        cout << "Available Courses:" << endl;
-        for (size_t i = 0; i < availableCourses.size(); ++i)
-        {
-            cout << i + 1 << ". " << availableCourses[i].getCourseName()
-                 << " (" << availableCourses[i].getPrice() << ")" << endl;
-        }
-    }
-
-    void displayProfile() const override
-    {
-        cout << "Student Profile" << endl;
-        cout << "Name: " << getFirstName() << " " << getLastName() << endl;
-        cout << "Username: " << getUsername() << endl;
-        cout << "Email: " << email << endl;
-        cout << "Grade Level: " << getGradeLevel() << endl;
-        cout << "Courses Taken:" << endl;
-        for (const auto &course : coursesTaken)
-        {
-            cout << "- " << course.getCourseName() << endl;
+    void loginUser(const string& username, const string& password) {
+        auto it = users.find(username);
+        if (it != users.end()) {
+            if (it->second->isPasswordCorrect(password)) {
+                cout<<"\n";
+                cout << "# Login successful!\n";
+                it->second->displayType();
+                cout << "# Welcome, " << username << "!\n";
+                cout << "////////////////////////////" << endl;
+            } else {
+                cout << "Error: Incorrect password.\n";
+            }
+        } else {
+            cout << "Error: User not found.\n";
         }
     }
 };
 
-class Webpage
-{
-private:
-    vector<User *> users;
-    vector<Course> allCourses;
+int main() {
+    UserManager userManager;
+    int choice = 0;
 
-public:
-    void addUser(User *user)
-    {
-        users.push_back(user);
-    }
-
-    void addCourse(const Course &course)
-    {
-        allCourses.push_back(course);
-    }
-
-    void displayAllProfiles() const
-    {
-        for (const auto &user : users)
-        {
-            user->displayProfile();
-            cout << endl;
-        }
-    }
-
-    vector<Course> &getAllCourses() // Changed return type to vector<Course>
-    {
-        return allCourses;
-    }
-};
-
-void clear_screen()
-{
-    #ifdef _WIN32
-        system("cls");
-    #else
-        system("clear");
-    #endif
-}
-
-int main()
-{
-    Webpage webpage;
-    Teacher teacher("JohnDoe", "johndoe@email.com", "John", "Doe");
-    Student student("JaneDoe", "janedoe@email.com", "Jane", "Doe", 10);
-
-    webpage.addUser(&teacher);
-    webpage.addUser(&student);
-
-    int choice;
-    do
-    {
-        clear_screen();
-        cout << "*******************************************" << endl;
-        cout << "*** 1. Teacher: Create Course           ***" << endl;
-        cout << "*** 2. Student: Buy Course              ***" << endl;
-        cout << "*** 3. Student: Browse Courses          ***" << endl;
-        cout << "*** 4. Student: Show Courses Taken      ***" << endl;
-        cout << "*** 5. Student: Add Credits             ***" << endl;
-        cout << "*** 6. Student: Show Remaining Credits  ***" << endl;
-        cout << "*** 7. Exit                             ***" << endl;
-        cout << "*******************************************" << endl;
-        cout << "\nEnter your choice: ";
+    while (choice != 4) {
+        userManager.displayMenu();
+        cout << "Enter your choice: ";
         cin >> choice;
 
-        switch (choice)
-        {
+        switch (choice) {
         case 1:
-        {
-            string courseName, courseCode, timeSlot;
-            float price;
-            int duration;
-            cout << "Enter Course Name: ";
-            cin.ignore(); // Ignore newline from previous input
-            getline(cin, courseName);
-            cout << "Enter Course Code: ";
-            getline(cin, courseCode);
-            cout << "Enter Price: ";
-            cin >> price;
-            cin.ignore(); // Ignore newline from previous input
-            cout << "Enter Time Slot: ";
-            getline(cin, timeSlot);
-            cout << "Enter Duration (in weeks): ";
-            cin >> duration;
-            teacher.createCourse(courseName, courseCode, price, timeSlot, duration);
-            webpage.addCourse(Course(courseName, courseCode, price, timeSlot, duration)); // Provide all 5 arguments
+            userManager.registerUser();
             break;
-        }
         case 2:
-        {
-            student.browseCourses(webpage.getAllCourses());
-            int courseChoice;
-            cout << "Enter Course Number to Buy: ";
-            cin >> courseChoice;
-            if (courseChoice >= 1 && courseChoice <= webpage.getAllCourses().size())
-            {
-                student.buyCourse(webpage.getAllCourses()[courseChoice - 1]);
-            }
-            else
-            {
-                cout << "Invalid course choice!" << endl;
-            }
+            userManager.registerUser();
+            break;
+        case 3: {
+            string username, password;
+            cout << "Enter username: ";
+            cin >> username;
+            cout << "Enter password: ";
+            cin >> password;
+            userManager.loginUser(username, password);
             break;
         }
-        case 3:
-            student.browseCourses(webpage.getAllCourses());
-            break;
         case 4:
-            student.displayProfile();
-            break;
-        case 5:
-            float credits;
-            cout << "Enter credits to add: ";
-            cin >> credits;
-            student.addCredits(credits);
-            break;
-        case 6:
-            cout << "Remaining Credits: " << student.getCreditBalance() << endl;
-            break;
-        case 7:
-            cout << "Exiting program..." << endl;
+            cout << "Exiting...\n";
             break;
         default:
-            cout << "Invalid choice!" << endl;
+            cout << "Invalid choice. Please try again.\n";
         }
-
         cout << "\nPress Enter to continue...";
         cin.ignore();
         cin.get();
-    } while (choice != 7);
+    }
 
     return 0;
 }
